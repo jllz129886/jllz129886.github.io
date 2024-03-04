@@ -390,14 +390,16 @@ function adddefeat(leng) {      //leng星星数  追加失败
 }
 //更改保护追加按钮
 function changebhzj(leng) {
+    var bhzj = "保护追加";
     switch (leng) {
-        case 1:document.forms[0].bhzj.value = "保护追加(6)";break;
-        case 2:document.forms[0].bhzj.value = "保护追加(17)";break;
-        case 3:document.forms[0].bhzj.value = "保护追加(51)";break;
-        case 4:document.forms[0].bhzj.value = "保护追加(153)";break;
-        case 5:document.forms[0].bhzj.value = "保护追加(440)";break;
-        case 6:document.forms[0].bhzj.value = "保护追加(827)";break;
+        case 1:bhzj = "保护追加(6)";break;
+        case 2:bhzj = "保护追加(17)";break;
+        case 3:bhzj = "保护追加(51)";break;
+        case 4:bhzj = "保护追加(153)";break;
+        case 5:bhzj = "保护追加(440)";break;
+        case 6:bhzj = "保护追加(827)";break;
     }
+    $('button[name="bhzj"]').text(bhzj)
 }
 //保护追加扣除多少钱
 function spendbhzj(leng) {
