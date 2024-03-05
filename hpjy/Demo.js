@@ -100,7 +100,8 @@ function f() {
         }
     }else{
         layer.msg("请先领取奖励！");
-    }
+    }    
+    form.render('radio');
     procount = 0;
 }
 //点击普通追加
