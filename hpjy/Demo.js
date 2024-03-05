@@ -66,6 +66,23 @@ function pay() {
         }
     });
 }
+function reset() {
+
+    document.forms[0].ptzj.style.display = "none";    //隐藏“普通追加”按钮
+    document.forms[0].bhzj.style.display = "none";    //隐藏“保护追加”按钮
+    document.forms[0].cj.style.display = "inline";    //显示“抽奖”按钮
+    document.forms[0].lqjl.style.display = "none";    //隐藏“领取奖励”按钮
+    document.forms[0].mydebris.value = 0;
+    document.forms[0].balance.value = 0;
+    document.forms[0].badge.value = 0;
+    document.forms[0].realtime.value = "";
+    document.getElementById("sp").title = "NULL";
+    document.getElementById("jp").title = "NULL";
+    document.getElementById("mine").innerHTML="";
+    document.getElementById("record").innerHTML = "记录：\n";
+    allbalance = 0;
+    form.render('radio');
+}
 //点击清空记录
 function clearrecord() {
     document.getElementById("record").innerHTML = "记录：\n";
@@ -100,7 +117,7 @@ function f() {
         }
     }else{
         layer.msg("请先领取奖励！");
-    }    
+    }
     form.render('radio');
     procount = 0;
 }
