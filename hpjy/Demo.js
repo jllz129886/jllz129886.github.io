@@ -14,6 +14,7 @@ var count = 0;  //计数
 var procount = 0;
 var alldebris = 0; //碎片总数
 var carnum = 0;     //车钥匙
+var curPayCoin = 0; // 当前轮次累计消费幸运币
 //记录打印事件
 function printfun(str,nort) {   //nort值决定是否换行
     if (nort == "n") {
@@ -96,6 +97,7 @@ function f() {
         }else{
             count = 0;  //赋予初始值
             allbalance -= 6;
+            curPayCoin += 6;
             document.forms[0].balance.value = allbalance;   //更新余额
             printfun("----------","n");
             document.getElementById("record").appendChild(document.createTextNode("\n"+getTime()));
@@ -157,7 +159,7 @@ function f2() {
             ott[count] = fott();
             printfun("保护追加："+ace[count]+ott[count],"t");
             if (ace[count] == document.forms[0].realtime.value.charAt(0)) {     //追加成功
-                printfun("第"+(procount+1)+"次保护追加成功！","t");
+                printfun("第"+(procount+1)+"次保护追加成功！当前轮次累计消费 "+curPayCoin,"t");
                 document.forms[0].realtime.value = document.forms[0].realtime.value.concat(ott[count]);
                 document.getElementById("sp").title = "五曜令牌×" + getdebris(document.forms[0].realtime.value.length-1); //更新当前碎片
                 if (document.forms[0].realtime.value.length - 1 >= 3) {
@@ -166,7 +168,7 @@ function f2() {
                 count++;
                 procount = 0;
             }else{      //追加失败
-                printfun("第"+(procount+1)+"次保护追加失败！","t");
+                printfun("第"+(procount+1)+"次保护追加失败！当前轮次累计消费 "+curPayCoin,"t");
                 procount++;
             }
         }else{
@@ -174,7 +176,7 @@ function f2() {
             ott[count] = fott();
             printfun("保护追加："+ace[count]+ott[count],"t");
             document.forms[0].realtime.value = document.forms[0].realtime.value.concat(ott[count]);
-            printfun("第"+(procount+1)+"次保护追加成功！","t");
+            printfun("第"+(procount+1)+"次保护追加成功！当前轮次累计消费 "+curPayCoin,"t");
             document.getElementById("sp").title = "五曜令牌×" + getdebris(document.forms[0].realtime.value.length-1); //更新当前碎片
             if (document.forms[0].realtime.value.length - 1 >= 3) {
                 document.getElementById("jp").title = getprize(document.forms[0].realtime.value.charAt(0),document.forms[0].realtime.value.length-1);
@@ -209,8 +211,7 @@ function f3() {
                 }else if (document.forms[0].realtime.value.length-1 >=7) {
                     document.forms[0].badge.value = Number(document.forms[0].badge.value)+3;
                 }else{
-                    document.getElementById("mine").appendChild(document.createTextNode("\n"+document.getElementById("jp").title+" -- "+document.forms[0].realtime.value));
-
+                    document.getElementById("mine").appendChild(document.createTextNode("\n"+document.getElementById("jp").title+" -- "+document.forms[0].realtime.value+" -- "+curPayCoin));
                 }
             }
             document.forms[0].realtime.value = "";
@@ -220,6 +221,7 @@ function f3() {
             document.forms[0].ptzj.style.display = "none";    //隐藏“普通追加”按钮
             document.forms[0].bhzj.style.display = "none";    //隐藏“保护追加”按钮
             document.forms[0].lqjl.style.display = "inline";    //隐藏“领取奖励”按钮
+            curPayCoin=0;
         }
     }
     document.forms[0].balance.value = allbalance;
@@ -333,6 +335,7 @@ function adddefeat(leng) {      //leng星星数  追加失败
         document.forms[0].realtime.value = document.forms[0].realtime.value.substring(0,document.forms[0].realtime.value.length-1);
         document.getElementById("sp").title = "NULL"; //更新当前碎片
         document.forms[0].mydebris.value = Number(document.forms[0].mydebris.value) + 2;
+        curPayCoin=0;
         //return 2;
     }else{
         if (rdm3 < 7.5) {       //降一星的情况
@@ -341,12 +344,14 @@ function adddefeat(leng) {      //leng星星数  追加失败
                 printfun("降一星\t已领取五曜令牌×12","n");
                 document.getElementById("sp").title = "NULL"; //更新当前碎片
                 document.forms[0].mydebris.value = Number(document.forms[0].mydebris.value) + 12;
+                curPayCoin=0;
                 //return 12;
             }
             if (leng == 3) {
                 printfun("降一星\t已领取五曜令牌×36","n");
                 document.getElementById("sp").title = "NULL"; //更新当前碎片
                 document.forms[0].mydebris.value = Number(document.forms[0].mydebris.value) + 36;
+                curPayCoin=0;
                 //return 36;
             }
             if (leng == 4) {
@@ -370,18 +375,21 @@ function adddefeat(leng) {      //leng星星数  追加失败
                 printfun("降两星\t已领取五曜令牌×4","n");
                 document.getElementById("sp").title = "NULL"; //更新当前碎片
                 document.forms[0].mydebris.value = Number(document.forms[0].mydebris.value) + 4;
+                curPayCoin=0;
                 //return 4;
             }
             if (leng == 3) {
                 printfun("降两星\t已领取五曜令牌×12","n");
                 document.getElementById("sp").title = "NULL"; //更新当前碎片
                 document.forms[0].mydebris.value = Number(document.forms[0].mydebris.value) + 12;
+                curPayCoin=0;
                 //return 12;
             }
             if (leng == 4) {
                 printfun("降两星\t已领取五曜令牌×36","n");
                 document.getElementById("sp").title = "NULL"; //更新当前碎片
                 document.forms[0].mydebris.value = Number(document.forms[0].mydebris.value) + 36;
+                curPayCoin=0;
                 //return 36;
             }
             if (leng == 5) {
@@ -429,6 +437,7 @@ function spendbhzj(leng) {
             return false;
         }else{
             printfun("余额-6","n");
+            curPayCoin += 6;
             document.forms[0].balance.value = allbalance - 6;
             return true;
         }break;
@@ -438,6 +447,7 @@ function spendbhzj(leng) {
             return false;
         }else{
             printfun("余额-17","n");
+            curPayCoin += 17;
             document.forms[0].balance.value = allbalance - 17;
             return true;
         }break;
@@ -447,6 +457,7 @@ function spendbhzj(leng) {
             return false;
         }else{
             printfun("余额-51","n");
+            curPayCoin += 51;
             document.forms[0].balance.value = allbalance - 51;
             return true;
         }break;
@@ -456,6 +467,7 @@ function spendbhzj(leng) {
             return false;
         }else{
             printfun("余额-153","n");
+            curPayCoin += 153;
             document.forms[0].balance.value = allbalance - 153;
             return true;
         }break;
@@ -465,6 +477,7 @@ function spendbhzj(leng) {
             return false;
         }else{
             printfun("余额-440","n");
+            curPayCoin += 440;
             document.forms[0].balance.value = allbalance - 440;
             return true;
         }break;
@@ -474,6 +487,7 @@ function spendbhzj(leng) {
             return false;
         }else{
             printfun("余额-827","n");
+            curPayCoin += 827;
             document.forms[0].balance.value = allbalance - 827;
             return true;
         }break;
