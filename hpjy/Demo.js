@@ -209,7 +209,7 @@ function f3() {
                 }else if (document.forms[0].realtime.value.length-1 >=7) {
                     document.forms[0].badge.value = Number(document.forms[0].badge.value)+3;
                 }else{
-                    document.getElementById("mine").appendChild(document.createTextNode("\n"+document.getElementById("jp").title));
+                    document.getElementById("mine").appendChild(document.createTextNode("\n"+document.getElementById("jp").title+" -- "+document.forms[0].realtime.value));
 
                 }
             }
