@@ -82,6 +82,7 @@ function reset() {
     document.getElementById("mine").innerHTML="";
     document.getElementById("record").innerHTML = "记录：\n";
     allbalance = 0;
+    curPayCoin = 0;
     form.render('radio');
 }
 //点击清空记录
