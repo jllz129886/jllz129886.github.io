@@ -6,12 +6,16 @@
     <!-- 添加视口元标签以优化移动端显示 -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/layui@2.6.8/dist/css/layui.css">
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        /* 确保表格宽度为100% */
+        table {
+            width: 100%;
+        }
         table tr{
             text-align: center;
         }
         td{
-            width: 200px;
             height: 60px;
         }
         /* 使用媒体查询优化小屏幕显示 */
@@ -33,37 +37,48 @@
 <body>
 
 <div class="layui-container">
-    <a href="https://gp.qq.com/cp/a20200124wuxing/wuxing.html" target="_blank" class="layui-btn layui-btn-primary">玩法介绍</a>
+    <a href="https://gp.qq.com/cp/a20200124wuxing/wuxing.html" target="_blank"
+       class="layui-btn layui-btn-primary">玩法介绍</a>
     <h1 class="layui-text-center">五曜赐福</h1>
-    <div class="layui-row">
-        <div class="layui-col-xs12">
-            <form class="layui-form" action="">
+
+    <form class="layui-form" action="">
+        <div class="layui-row">
+            <div class="layui-col-xs12">
+                <div class="form-group">
+                    <div class="input-group">
+                        <label>
+                            <input type="text" class="layui-input form-control" name="balance" autocomplete="off"
+                                   placeholder="幸运币余额 请点击充值" readonly/>
+                        </label>
+                        <span class="input-group-btn">
+                        <button type="button" class="layui-btn" onclick="pay()">充值</button>
+                    </span>
+                        <span class="input-group-btn">
+                        <button type="button" class="layui-btn  layui-btn-primary" onclick="resetData()">重置</button>
+                    </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row">
+            <div class="layui-col-xs12 layui-col-md6">
                 <table class="layui-table" align="center">
                     <tr>
                         <td colspan="2">
                             <input type="text" name="realtime" class="layui-input" readonly>
                         </td>
-                        <td>
-                            <label class="layui-form-label">幸运币:</label>
-                            <div class="layui-input-block">
-                                <input type="text" name="balance" lay-verify="title" autocomplete="off" placeholder="请充值" class="layui-input" readonly>
-                            </div>
-                        </td>
-                        <td>
-                            <a href="javascript:;" onclick="pay()" class="layui-btn">充值</a>
-                            <a href="javascript:;" onclick="reset()" class="layui-btn layui-btn-primary">重置</a>
-                        </td>
                     </tr>
                     <tr>
-                        <td>
-                            <button type="button" class="layui-btn" name="cj"  onclick="f()">抽奖(6)</button>
-                            <button type="button" class="layui-btn layui-btn-normal" name="ptzj"  onclick="f1()" style="display: none;">普通追加</button>
+                        <td style="width: 50%;">
+                            <button type="button" class="layui-btn" name="cj" onclick="f()">抽奖(6)</button>
+                            <button type="button" class="layui-btn layui-btn-normal" name="ptzj" onclick="f1()"
+                                    style="display: none;">普通追加
+                            </button>
                         </td>
-                        <td>
-                            <button type="button" class="layui-btn layui-btn-danger" name="bhzj" onclick="f2()" style="display: none;"  >保护追加</button>
-                        </td>
-                        <td colspan="2">
-                            <button type="button" class="layui-btn layui-btn-warm" name="qkjl"  onclick="clearrecord()">清空记录</button>
+                        <td style="width: 50%;">
+                            <button type="button" class="layui-btn layui-btn-danger" name="bhzj" onclick="f2()"
+                                    style="display: none;">保护追加
+                            </button>
                         </td>
                     </tr>
                     <tr>
@@ -73,38 +88,55 @@
                         <td>
                             <input type="radio" name="pr" value="奖品2" title="NULL" id="jp">
                         </td>
-                        <td colspan="2" rowspan="5">
-                            <textarea id="record" class="layui-textarea" readonly style="height: 100%">记录：</textarea>
-                        </td>
                     </tr>
                     <tr>
                         <td colspan="2">
-                            <button type="button" class="layui-btn layui-btn-primary" name="lqjl"  onclick="f3()" style="display: none;">领取奖励</button>
+                            <button type="button" class="layui-btn layui-btn-primary" name="lqjl" onclick="f3()"
+                                    style="display: none;">领取奖励
+                            </button>
                         </td>
                     </tr>
                     <tr>
                         <td>
                             <label class="layui-form-label">五曜令牌:</label>
                             <div class="layui-input-block">
-                                <input type="text" name="mydebris" lay-verify="title" autocomplete="off" class="layui-input" readonly>
+                                <input type="text" name="mydebris" lay-verify="title" autocomplete="off"
+                                       class="layui-input" readonly>
                             </div>
                         </td>
                         <td>
                             <label class="layui-form-label">兑换徽章:</label>
                             <div class="layui-input-block">
-                                <input type="text" name="badge" lay-verify="title" autocomplete="off" class="layui-input" readonly>
+                                <input type="text" name="badge" lay-verify="title" autocomplete="off"
+                                       class="layui-input" readonly>
                             </div>
                         </td>
                     </tr>
-                    <tr style="height: 300px;">
+                    <tr style="height: 200px;">
                         <td colspan="2">
                             <textarea id="mine" class="layui-textarea" readonly style="height: 100%">我的：</textarea>
                         </td>
                     </tr>
-    </table>
-</form>
+                </table>
+            </div>
+            <div class="layui-col-xs12 layui-col-md6">
+                <table class="layui-table" align="center">
+                    <tr>
+                        <td>
+                            <button type="button" class="layui-btn layui-btn-warm" name="qkjl" onclick="clearrecord()">
+                                清空记录
+                            </button>
+                        </td>
+                    </tr>
+                    <tr style="height: 600px;">
+                        <td>
+                            <textarea id="record" class="layui-textarea" readonly style="height: 100%">记录：</textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/layui@2.6.8/dist/layui.js"></script>
