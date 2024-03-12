@@ -3,6 +3,7 @@ window.onload = function () {
     document.forms[0].mydebris.value = 0;
     document.forms[0].balance.value = 0;
     document.forms[0].badge.value = 0;
+    document.onselectstart=function(){return false;};
 }
 var form = layui.form;
 var layer = layui.layer;
