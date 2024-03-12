@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>五曜赐福</title>
+    <!-- 添加视口元标签以优化移动端显示 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/layui@2.6.8/dist/css/layui.css">
     <style>
         table tr{
@@ -11,6 +13,20 @@
         td{
             width: 200px;
             height: 60px;
+        }
+        /* 使用媒体查询优化小屏幕显示 */
+        @media (max-width: 768px) {
+            td, .layui-input, .layui-btn {
+                width: 100%; /* 使得表格单元、输入框和按钮在小屏幕上占满可用宽度 */
+                margin-bottom: 10px; /* 添加一些间距 */
+            }
+            .layui-form-label {
+                display: block; /* 在小屏幕上使标签独占一行 */
+                margin-bottom: 5px; /* 添加一些间距 */
+            }
+            .layui-input-block {
+                margin: 0; /* 调整间距 */
+            }
         }
     </style>
 </head>
