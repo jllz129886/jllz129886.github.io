@@ -389,6 +389,7 @@
         function playVideo(url,vod_name) {
             showLoading();
             const modalContent = document.getElementById('modalContent');
+            const modalTitle = document.getElementById('modalTitle');
             const currentTitle = modalTitle.textContent.split(' - ')[0];
             const currentHtml = modalContent.innerHTML;
             
@@ -410,7 +411,7 @@
                     <div class="space-y-6">
                         <div class="video-player">
                             <iframe 
-                                src="https://hoplayer.com/index.html?url=${url}&autoplay=true"
+                                src="https://hoplayer.com/index.html?url=${encodeURIComponent(url)}&autoplay=true"
                                 width="100%" 
                                 height="600" 
                                 frameborder="0" 
@@ -431,7 +432,7 @@
                     <div class="space-y-6">
                         <div class="video-player">
                             <iframe 
-                                src="https://hoplayer.com/index.html?url=${url}&autoplay=true"
+                                src="https://hoplayer.com/index.html?url=${encodeURIComponent(url)}&autoplay=true"
                                 width="100%" 
                                 height="600" 
                                 frameborder="0" 
@@ -465,7 +466,6 @@
             }
         });
 
-
         // 优化后的API请求处理函数
         async function handleApiRequest(url) {
             const customApi = url.searchParams.get('customApi') || '';
@@ -483,7 +483,10 @@
                         ? `${customApi}/api.php/provide/vod/?ac=list&wd=${encodeURIComponent(searchQuery)}`
                         : `${API_SITES[source].api}/api.php/provide/vod/?ac=list&wd=${encodeURIComponent(searchQuery)}`;
                     
-                    const response = await fetch(proxyUrl + apiUrl, {
+                    // 关键修复：对apiUrl进行完整的URL编码
+                    const encodedApiUrl = encodeURIComponent(apiUrl);
+                    
+                    const response = await fetch(proxyUrl + encodedApiUrl, {
                         headers: {
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                             'Accept': 'application/json',
@@ -513,7 +516,10 @@
                         ? `${customApi}/index.php/vod/detail/id/${id}.html`
                         : `${API_SITES[source].detail}/index.php/vod/detail/id/${id}.html`;
                     
-                    const response = await fetch(proxyUrl + detailUrl, {
+                    // 关键修复：对detailUrl进行完整的URL编码
+                    const encodedDetailUrl = encodeURIComponent(detailUrl);
+                    
+                    const response = await fetch(proxyUrl + encodedDetailUrl, {
                         headers: {
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                         },
