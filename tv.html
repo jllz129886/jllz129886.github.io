@@ -477,12 +477,13 @@
                     if (!searchQuery) {
                         throw new Error('缺少搜索参数');
                     }
-
+                    // 使用代理URL解决CORS问题
+                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
                     const apiUrl = customApi
                         ? `${customApi}/api.php/provide/vod/?ac=list&wd=${encodeURIComponent(searchQuery)}`
                         : `${API_SITES[source].api}/api.php/provide/vod/?ac=list&wd=${encodeURIComponent(searchQuery)}`;
                     
-                    const response = await fetch(apiUrl, {
+                    const response = await fetch(proxyUrl + apiUrl, {
                         headers: {
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                             'Accept': 'application/json',
