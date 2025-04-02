@@ -27,192 +27,578 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        .settings-panel {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        .settings-panel.show {
+            transform: translateX(0);
+        }
+        
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #111;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+        
+        /* Firefox 滚动条样式 */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #333 #111;
+        }
     </style>
 </head>
 <body class="page-bg text-white">
+    <div class="fixed top-4 right-4 z-50 flex items-center space-x-4">
+        <button onclick="toggleSettings(event)" class="bg-[#222] hover:bg-[#333] border border-[#333] hover:border-white rounded-lg px-4 py-2 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <!-- 设置面板 -->
+    <div id="settingsPanel" class="settings-panel fixed right-0 top-0 h-full w-80 bg-[#111] border-l border-[#333] p-6 z-40">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold gradient-text">设置</h3>
+            <button onclick="toggleSettings()" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-400 mb-2">选择采集站点</label>
+                <select id="apiSource" class="w-full bg-[#222] border border-[#333] text-white px-3 py-2 rounded-lg focus:outline-none focus:border-white transition-colors">
+                    <option value="heimuer">黑莓影视 (heimuer)</option>
+                    <option value="ffzy">非凡影视 (ffzy)</option>
+                    <option value="custom">自定义接口</option>
+                </select>
+            </div>
+            
+            <!-- 添加自定义接口输入框 -->
+            <div id="customApiInput" class="hidden">
+                <label class="block text-sm font-medium text-gray-400 mb-2">自定义接口地址</label>
+                <input 
+                    type="text" 
+                    id="customApiUrl" 
+                    class="w-full bg-[#222] border border-[#333] text-white px-3 py-2 rounded-lg focus:outline-none focus:border-white transition-colors"
+                    placeholder="请输入接口地址..."
+                >
+            </div>
+            
+            <div class="mt-4">
+                <p class="text-xs text-gray-500">当前站点代码：
+                    <span id="currentCode" class="text-white"></span>
+                    <span id="siteStatus" class="ml-2"></span>
+                </p>
+            </div>
+        </div>
+    </div>
+
     <div class="container mx-auto px-4 py-8 flex flex-col h-screen">
         <div class="flex-1 flex flex-col">
-            <!-- 搜索区域 -->
+            <!-- 搜索区域：默认居中 -->
             <div id="searchArea" class="flex-1 flex flex-col items-center justify-center">
                 <h1 class="text-5xl font-bold gradient-text mb-12">视频搜索</h1>
                 <div class="w-full max-w-2xl">
                     <div class="flex">
-                        <input type="text" id="searchInput" 
-                            class="w-full bg-[#111] border border-[#333] text-white px-6 py-4 rounded-l-lg focus:outline-none focus:border-white transition-colors" 
-                            placeholder="搜索你喜欢的视频...">
+                        <input type="text" 
+                               id="searchInput" 
+                               class="w-full bg-[#111] border border-[#333] text-white px-6 py-4 rounded-l-lg focus:outline-none focus:border-white transition-colors" 
+                               placeholder="搜索你喜欢的视频...">
                         <button onclick="search()" 
-                            class="px-8 py-4 bg-white text-black font-medium rounded-r-lg hover:bg-gray-200 transition-colors">
+                                class="px-8 py-4 bg-white text-black font-medium rounded-r-lg hover:bg-gray-200 transition-colors">
                             搜索
                         </button>
                     </div>
                 </div>
             </div>
             
-            <!-- 搜索结果区域 -->
+            <!-- 搜索结果：初始隐藏 -->
             <div id="resultsArea" class="w-full hidden">
-                <div id="results" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+                <div id="results" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                </div>
             </div>
         </div>
     </div>
 
     <!-- 详情模态框 -->
-    <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-50">
+    <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center">
         <div class="bg-[#111] p-8 rounded-lg w-11/12 max-w-4xl border border-[#333] max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex justify-between items-center mb-6 flex-none">
                 <h2 id="modalTitle" class="text-2xl font-bold gradient-text"></h2>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl transition-colors">&times;</button>
             </div>
             <div id="modalContent" class="overflow-auto flex-1 min-h-0">
-                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"></div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- 错误提示框 -->
+    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 opacity-0 -translate-y-full">
+        <p id="toastMessage"></p>
+    </div>
+
+    <!-- 添加 loading 提示框 -->
+    <div id="loading" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50">
+        <div class="bg-[#111] p-8 rounded-lg border border-[#333] flex items-center space-x-4">
+            <div class="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-white text-lg">加载中...</p>
+        </div>
+    </div>
+
     <script>
-        const API_SOURCE = 'heimuer';
-        const API_URL = 'https://json.heimuer.xyz';
-        const PROXY_URL = 'https://proxy.mengze.vip/proxy/';
+        // API站点配置
+        const API_SITES = {
+            heimuer: {
+                api: 'https://json.heimuer.xyz',
+                name: '黑木耳',
+                detail: 'https://heimuer.tv',
+            },
+            ffzy: {
+                api: 'http://ffzy5.tv',
+                name: '非凡影视',
+                detail: 'http://ffzy5.tv',
+            },
+        };
 
-        // 检测是否是反代访问
-        const isProxyRequest = window.location.href.includes('proxy.mengze.vip/proxy/');
+        let currentApiSource = localStorage.getItem('currentApiSource') || 'heimuer';
+        let customApiUrl = localStorage.getItem('customApiUrl') || '';
 
+        // 初始化时检查是否使用自定义接口
+        if (currentApiSource === 'custom') {
+            document.getElementById('customApiInput').classList.remove('hidden');
+            document.getElementById('customApiUrl').value = customApiUrl;
+        }
+
+        // 设置 select 的默认选中值
+        document.getElementById('apiSource').value = currentApiSource;
+
+        function toggleSettings(e) {
+            // 阻止事件冒泡，防止触发document的点击事件
+            e && e.stopPropagation();
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('show');
+        }
+
+        async function testSiteAvailability(source) {
+            try {
+                const apiParams = source === 'custom' 
+                    ? '&customApi=' + encodeURIComponent(customApiUrl)
+                    : '&source=' + source;
+                    
+                const response = await fetch('/api/search?wd=test' + apiParams);
+                const data = await response.json();
+                return data.code !== 400;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function updateSiteStatus(isAvailable) {
+            const statusEl = document.getElementById('siteStatus');
+            if (isAvailable) {
+                statusEl.innerHTML = '<span class="text-green-500">●</span> 可用';
+            } else {
+                statusEl.innerHTML = '<span class="text-red-500">●</span> 不可用';
+            }
+        }
+
+        document.getElementById('apiSource').addEventListener('change', async function(e) {
+            currentApiSource = e.target.value;
+            const customApiInput = document.getElementById('customApiInput');
+            
+            if (currentApiSource === 'custom') {
+                customApiInput.classList.remove('hidden');
+                customApiUrl = document.getElementById('customApiUrl').value;
+                localStorage.setItem('customApiUrl', customApiUrl);
+                // 自定义接口不立即测试可用性
+                document.getElementById('siteStatus').innerHTML = '<span class="text-gray-500">●</span> 待测试';
+            } else {
+                customApiInput.classList.add('hidden');
+                // 非自定义接口立即测试可用性
+                showToast('正在测试站点可用性...', 'info');
+                const isAvailable = await testSiteAvailability(currentApiSource);
+                updateSiteStatus(isAvailable);
+                
+                if (!isAvailable) {
+                    showToast('当前站点不可用，请尝试其他站点', 'error');
+                } else {
+                    showToast('站点可用', 'success');
+                }
+            }
+            
+            localStorage.setItem('currentApiSource', currentApiSource);
+            document.getElementById('currentCode').textContent = currentApiSource;
+            
+            // 清理搜索结果
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('searchInput').value = '';
+        });
+
+        // 修改自定义接口输入框的事件监听
+        document.getElementById('customApiUrl').addEventListener('blur', async function(e) {
+            customApiUrl = e.target.value;
+            localStorage.setItem('customApiUrl', customApiUrl);
+            
+            if (currentApiSource === 'custom' && customApiUrl) {
+                showToast('正在测试接口可用性...', 'info');
+                const isAvailable = await testSiteAvailability('custom');
+                updateSiteStatus(isAvailable);
+                
+                if (!isAvailable) {
+                    showToast('接口不可用，请检查地址是否正确', 'error');
+                } else {
+                    showToast('接口可用', 'success');
+                }
+            }
+        });
+
+        // 初始化显示当前站点代码和状态
+        document.getElementById('currentCode').textContent = currentApiSource;
+        testSiteAvailability(currentApiSource).then(updateSiteStatus);
+
+        function showToast(message, type = 'error') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            const bgColors = {
+                'error': 'bg-red-500',
+                'success': 'bg-green-500',
+                'info': 'bg-blue-500'
+            };
+            
+            const bgColor = bgColors[type] || bgColors.error;
+            toast.className = `fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bgColor} text-white`;
+            toastMessage.textContent = message;
+            
+            // 显示提示
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(-50%) translateY(0)';
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(-100%)';
+            }, 3000);
+        }
+
+        // 添加显示/隐藏 loading 的函数
         function showLoading() {
-            document.body.style.cursor = 'wait';
+            const loading = document.getElementById('loading');
+            loading.style.display = 'flex';
         }
 
         function hideLoading() {
-            document.body.style.cursor = 'default';
-        }
-
-        function showError(message) {
-            alert(message);
-        }
-
-        // 构建API请求URL
-        function buildApiUrl(path, params = {}) {
-            const queryString = Object.entries(params)
-                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
-                .join('&');
-            
-            const fullUrl = `${API_URL}${path}${queryString ? '?' + queryString : ''}`;
-            
-            return isProxyRequest 
-                ? fullUrl  // 反代访问直接使用原始URL
-                : `${PROXY_URL}${encodeURIComponent(fullUrl)}`; // 直接访问需要编码
+            const loading = document.getElementById('loading');
+            loading.style.display = 'none';
         }
 
         async function search() {
             showLoading();
             const query = document.getElementById('searchInput').value;
-            if (!query) return showError('请输入搜索内容');
-
+            const apiParams = currentApiSource === 'custom' 
+                ? '&customApi=' + encodeURIComponent(customApiUrl)
+                : '&source=' + currentApiSource;
+            
             try {
-                const url = buildApiUrl('/api.php/provide/vod/', {
-                    ac: 'list',
-                    wd: query
-                });
-
-                const response = await fetch(url);
+                const response = await fetch('/api/search?wd=' + encodeURIComponent(query) + apiParams);
                 const data = await response.json();
                 
-                if (!data.list || data.list.length === 0) {
-                    return showError('未找到相关内容');
+                if (data.code === 400) {
+                    showToast(data.msg);
+                    return;
                 }
-
-                showResults(data.list);
+                
+                // 显示结果区域，调整搜索区域
+                document.getElementById('searchArea').classList.remove('flex-1');
+                document.getElementById('searchArea').classList.add('mb-8');
+                document.getElementById('resultsArea').classList.remove('hidden');
+                
+                const resultsDiv = document.getElementById('results');
+                resultsDiv.innerHTML = data.list.map(item => `
+                    <div class="card-hover bg-[#111] rounded-lg overflow-hidden cursor-pointer p-6 h-fit" onclick="showDetails('${item.vod_id}','${item.vod_name}')">
+                        <h3 class="text-xl font-semibold mb-3">${item.vod_name}</h3>
+                        <p class="text-gray-400 text-sm mb-2">${item.type_name}</p>
+                        <p class="text-gray-400 text-sm">${item.vod_remarks}</p>
+                    </div>
+                `).join('');
             } catch (error) {
-                showError('搜索失败: ' + error.message);
+                showToast('搜索请求失败，请稍后重试');
             } finally {
                 hideLoading();
             }
         }
 
-        function showResults(list) {
-            // 显示结果区域，调整搜索区域
-            document.getElementById('searchArea').classList.remove('flex-1');
-            document.getElementById('searchArea').classList.add('mb-8');
-            document.getElementById('resultsArea').classList.remove('hidden');
-            
-            // 使用原来的样式显示结果
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = list.map(item => `
-                <div class="card-hover bg-[#111] rounded-lg overflow-hidden cursor-pointer p-6 h-fit" 
-                     onclick="showDetails('${item.vod_id}','${item.vod_name}')">
-                    <h3 class="text-xl font-semibold mb-3">${item.vod_name}</h3>
-                    <p class="text-gray-400 text-sm mb-2">${item.type_name}</p>
-                    <p class="text-gray-400 text-sm">${item.vod_remarks}</p>
-                </div>
-            `).join('');
-        }
-
-        async function showDetails(id, name) {
+        async function showDetails(id,vod_name) {
             showLoading();
             try {
-                const url = buildApiUrl(`/index.php/vod/detail/id/${id}.html`);
-                const response = await fetch(url);
-                const html = await response.text();
+                const apiParams = currentApiSource === 'custom' 
+                    ? '&customApi=' + encodeURIComponent(customApiUrl)
+                    : '&source=' + currentApiSource;
+                    
+                const response = await fetch('/api/detail?id=' + id + apiParams);
+                const data = await response.json();
                 
-                const matches = html.match(/\$https?:\/\/[^"'\s]+?\.m3u8/g) || [];
-                const episodes = matches.map(link => 
-                    link.replace(/^[\$'"]+/, '').split(')')[0].split('(').pop()
-                ).filter(link => link.startsWith('http'));
-
-                if (episodes.length === 0) {
-                    return showError('未找到视频资源');
-                }
-
-                showEpisodes(name, episodes);
+                const modal = document.getElementById('modal');
+                const modalTitle = document.getElementById('modalTitle');
+                const modalContent = document.getElementById('modalContent');
+                
+                modalTitle.textContent = vod_name;
+                modalContent.innerHTML = `
+                    <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                        ${data.episodes.map((episode, index) => `
+                            <button onclick="playVideo('${episode}','${vod_name}')" 
+                                    class="px-4 py-2 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-white rounded-lg transition-colors text-center">
+                                第${index + 1}集
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+                
+                modal.classList.remove('hidden');
             } catch (error) {
-                showError('获取详情失败: ' + error.message);
+                showToast('获取详情失败，请稍后重试');
             } finally {
                 hideLoading();
             }
-        }
-
-        function showEpisodes(name, episodes) {
-            const modal = document.getElementById('modal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent').querySelector('div');
-            
-            modalTitle.textContent = name;
-            modalContent.innerHTML = episodes.map((url, index) => `
-                <button onclick="playVideo('${encodeURIComponent(url)}','${name}', ${index + 1})" 
-                        class="px-4 py-2 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-white rounded-lg transition-colors text-center">
-                    第${index + 1}集
-                </button>
-            `).join('');
-            
-            modal.classList.remove('hidden');
-        }
-
-        function playVideo(url, name, episode) {
-            const modalContent = document.getElementById('modalContent');
-            modalContent.innerHTML = `
-                <div class="space-y-4">
-                    <h3 class="text-xl">${name} - 第${episode}集</h3>
-                    <iframe 
-                        src="https://hoplayer.com/index.html?url=${url}&autoplay=true"
-                        width="100%" 
-                        height="500" 
-                        frameborder="0" 
-                        allowfullscreen>
-                    </iframe>
-                    <button onclick="showEpisodes('${name.replace(/'/g, "\\'")}')" 
-                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
-                        返回剧集列表
-                    </button>
-                </div>
-            `;
         }
 
         function closeModal() {
             document.getElementById('modal').classList.add('hidden');
+            // 清除 iframe 内容
+            document.getElementById('modalContent').innerHTML = '';
         }
+
+        function playVideo(url,vod_name) {
+            showLoading();
+            const modalContent = document.getElementById('modalContent');
+            const modalTitle = document.getElementById('modalTitle');
+            const currentTitle = modalTitle.textContent.split(' - ')[0];
+            const currentHtml = modalContent.innerHTML;
+            
+            // 从当前点击的按钮获取集数
+            const episodeNumber = event.target.textContent.replace(/[^0-9]/g, '');
+            
+            // 更新标题显示
+            modalTitle.textContent = vod_name + " - 第" + episodeNumber + "集";
+            
+            // 先移除现有的视频播放器（如果存在）
+            const existingPlayer = modalContent.querySelector('.video-player');
+            if (existingPlayer) {
+                existingPlayer.remove();
+            }
+            
+            // 如果是第一次播放，保存集数列表
+            if (!modalContent.querySelector('.episodes-list')) {
+                modalContent.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="video-player">
+                            <iframe 
+                                src="https://hoplayer.com/index.html?url=${url}&autoplay=true"
+                                width="100%" 
+                                height="600" 
+                                frameborder="0" 
+                                scrolling="no" 
+                                allowfullscreen="true"
+                                onload="hideLoading()">
+                            </iframe>
+                        </div>
+                        <div class="episodes-list mt-6">
+                            ${currentHtml}
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 如果已经有集数列表，只更新视频播放器
+                const episodesList = modalContent.querySelector('.episodes-list');
+                modalContent.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="video-player">
+                            <iframe 
+                                src="https://hoplayer.com/index.html?url=${url}&autoplay=true"
+                                width="100%" 
+                                height="600" 
+                                frameborder="0" 
+                                scrolling="no" 
+                                allowfullscreen="true"
+                                onload="hideLoading()">
+                            </iframe>
+                        </div>
+                        <div class="episodes-list mt-6">
+                            ${episodesList.innerHTML}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 点击外部关闭设置面板
+        document.addEventListener('click', function(e) {
+            const panel = document.getElementById('settingsPanel');
+            const settingsButton = document.querySelector('button[onclick="toggleSettings()"]');
+            
+            if (!panel.contains(e.target) && !settingsButton.contains(e.target) && panel.classList.contains('show')) {
+                panel.classList.remove('show');
+            }
+        });
 
         // 回车搜索
         document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') search();
+            if (e.key === 'Enter') {
+                search();
+            }
         });
+
+        // 优化后的API请求处理函数
+        async function handleApiRequest(url) {
+            const customApi = url.searchParams.get('customApi') || '';
+            const source = url.searchParams.get('source') || 'heimuer';
+            
+            try {
+                if (url.pathname === '/api/search') {
+                    const searchQuery = url.searchParams.get('wd');
+                    if (!searchQuery) {
+                        throw new Error('缺少搜索参数');
+                    }
+                    // 使用代理URL解决CORS问题
+                    const proxyUrl = 'https://proxy.mengze.vip/proxy/';
+                    const apiUrl = customApi
+                        ? `encodeURIComponent(${customApi}/api.php/provide/vod/?ac=list&wd=${searchQuery})`
+                        : `encodeURIComponent(${API_SITES[source].api}/api.php/provide/vod/?ac=list&wd=${searchQuery})`;
+                    
+                    // 关键修复：对apiUrl进行完整的URL编码
+                    const encodedApiUrl = encodeURIComponent(apiUrl);
+                    
+                    const response = await fetch(proxyUrl + encodedApiUrl, {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                            'Accept': 'application/json',
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`API请求失败: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    return JSON.stringify({
+                        code: 200,
+                        list: data.list || [],
+                    });
+                }
+
+                if (url.pathname === '/api/detail') {
+                    const id = url.searchParams.get('id');
+                    if (!id) {
+                        throw new Error('缺少视频ID参数');
+                    }
+
+                    // 使用代理URL解决CORS问题
+                    const proxyUrl = 'https://proxy.mengze.vip/proxy/';
+                    const detailUrl = customApi
+                        ? `encodeURIComponent(${customApi}/index.php/vod/detail/id/${id}.html)`
+                        : `encodeURIComponent(${API_SITES[source].detail}/index.php/vod/detail/id/${id}.html)`;
+                    
+                    // 关键修复：对detailUrl进行完整的URL编码
+                    const encodedDetailUrl = encodeURIComponent(detailUrl);
+                    
+                    const response = await fetch(proxyUrl + encodedDetailUrl, {
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`详情请求失败: ${response.status}`);
+                    }
+
+                    const html = await response.text();
+                    let matches = [];
+
+                    // 改进正则表达式匹配
+                    if (source === 'ffzy') {
+                        matches = html.match(/\$https?:\/\/[^"'\s]+?\.m3u8/g) || [];
+                    } else {
+                        matches = html.match(/\$https?:\/\/[^"'\s]+?\.m3u8/g) || [];
+                    }
+
+                    // 清理URL
+                    matches = matches.map(link => {
+                        // 移除开头的$和可能的引号
+                        link = link.replace(/^[\$'"]+/, '');
+                        // 移除URL参数中的多余部分
+                        return link.split(')')[0].split('(').pop();
+                    }).filter(link => link.startsWith('http'));
+
+                    return JSON.stringify({
+                        code: 200,
+                        episodes: matches,
+                        detailUrl: detailUrl,
+                    });
+                }
+
+                throw new Error('未知的API路径');
+            } catch (error) {
+                console.error('API处理错误:', error);
+                return JSON.stringify({
+                    code: 400,
+                    msg: error.message || '请求处理失败',
+                    list: [],
+                    episodes: [],
+                });
+            }
+        }
+
+        // 拦截API请求的改进版本
+        (function() {
+            const originalFetch = window.fetch;
+            
+            window.fetch = async function(input, init) {
+                const requestUrl = typeof input === 'string' ? new URL(input, window.location.origin) : input.url;
+                
+                if (requestUrl.pathname.startsWith('/api/')) {
+                    try {
+                        const data = await handleApiRequest(requestUrl);
+                        return new Response(data, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Access-Control-Allow-Origin': '*',
+                            },
+                        });
+                    } catch (error) {
+                        return new Response(JSON.stringify({
+                            code: 500,
+                            msg: '服务器内部错误',
+                        }), {
+                            status: 500,
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                    }
+                }
+                
+                // 非API请求使用原始fetch
+                return originalFetch.apply(this, arguments);
+            };
+        })();
     </script>
 </body>
 </html>
