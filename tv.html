@@ -164,6 +164,10 @@
     </div>
 
     <script>
+        // 全局常量配置
+        const PROXY_URL = 'https://proxy.mengze.vip/proxy/';
+        const HOPLAYER_URL = 'https://hoplayer.com/index.html';
+        
         // API站点配置
         const API_SITES = {
             heimuer: {
@@ -190,6 +194,9 @@
         // 设置 select 的默认选中值
         document.getElementById('apiSource').value = currentApiSource;
 
+
+        // 初始化显示当前站点代码
+        document.getElementById('currentCode').textContent = currentApiSource;
         function toggleSettings(e) {
             // 阻止事件冒泡，防止触发document的点击事件
             e && e.stopPropagation();
@@ -202,7 +209,7 @@
                 const apiParams = source === 'custom' 
                     ? '&customApi=' + encodeURIComponent(customApiUrl)
                     : '&source=' + source;
-                    
+                
                 const response = await fetch('/api/search?wd=test' + apiParams);
                 const data = await response.json();
                 return data.code !== 400;
@@ -269,10 +276,6 @@
                 }
             }
         });
-
-        // 初始化显示当前站点代码和状态
-        document.getElementById('currentCode').textContent = currentApiSource;
-        testSiteAvailability(currentApiSource).then(updateSiteStatus);
 
         function showToast(message, type = 'error') {
             const toast = document.getElementById('toast');
@@ -346,7 +349,7 @@
             }
         }
 
-        async function showDetails(id,vod_name) {
+        async function showDetails(id, vod_name) {
             showLoading();
             try {
                 const apiParams = currentApiSource === 'custom' 
@@ -386,7 +389,7 @@
             document.getElementById('modalContent').innerHTML = '';
         }
 
-        function playVideo(url,vod_name) {
+        function playVideo(url, vod_name) {
             showLoading();
             const modalContent = document.getElementById('modalContent');
             const modalTitle = document.getElementById('modalTitle');
@@ -411,7 +414,7 @@
                     <div class="space-y-6">
                         <div class="video-player">
                             <iframe 
-                                src="https://hoplayer.com/index.html?url=${url}&autoplay=true"
+                                src="${HOPLAYER_URL}?url=${url}&autoplay=true"
                                 width="100%" 
                                 height="600" 
                                 frameborder="0" 
@@ -432,7 +435,7 @@
                     <div class="space-y-6">
                         <div class="video-player">
                             <iframe 
-                                src="https://hoplayer.com/index.html?url=${url}&autoplay=true"
+                                src="${HOPLAYER_URL}?url=${url}&autoplay=true"
                                 width="100%" 
                                 height="600" 
                                 frameborder="0" 
@@ -477,16 +480,12 @@
                     if (!searchQuery) {
                         throw new Error('缺少搜索参数');
                     }
-                    // 使用代理URL解决CORS问题
-                    const proxyUrl = 'https://proxy.mengze.vip/proxy/';
+                    
                     const apiUrl = customApi
-                        ? `encodeURIComponent(${customApi}/api.php/provide/vod/?ac=list&wd=${searchQuery})`
-                        : `encodeURIComponent(${API_SITES[source].api}/api.php/provide/vod/?ac=list&wd=${searchQuery})`;
+                        ? encodeURIComponent(`${customApi}/api.php/provide/vod/?ac=list&wd=${searchQuery}`)
+                        : encodeURIComponent(`${API_SITES[source].api}/api.php/provide/vod/?ac=list&wd=${searchQuery}`);
                     
-                    // 关键修复：对apiUrl进行完整的URL编码
-                    const encodedApiUrl = encodeURIComponent(apiUrl);
-                    
-                    const response = await fetch(proxyUrl + encodedApiUrl, {
+                    const response = await fetch(PROXY_URL + apiUrl, {
                         headers: {
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                             'Accept': 'application/json',
@@ -510,16 +509,11 @@
                         throw new Error('缺少视频ID参数');
                     }
 
-                    // 使用代理URL解决CORS问题
-                    const proxyUrl = 'https://proxy.mengze.vip/proxy/';
                     const detailUrl = customApi
-                        ? `encodeURIComponent(${customApi}/index.php/vod/detail/id/${id}.html)`
-                        : `encodeURIComponent(${API_SITES[source].detail}/index.php/vod/detail/id/${id}.html)`;
+                        ? encodeURIComponent(`${customApi}/index.php/vod/detail/id/${id}.html`)
+                        : encodeURIComponent(`${API_SITES[source].detail}/index.php/vod/detail/id/${id}.html`);
                     
-                    // 关键修复：对detailUrl进行完整的URL编码
-                    const encodedDetailUrl = encodeURIComponent(detailUrl);
-                    
-                    const response = await fetch(proxyUrl + encodedDetailUrl, {
+                    const response = await fetch(PROXY_URL + detailUrl, {
                         headers: {
                             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                         },
@@ -599,6 +593,8 @@
                 return originalFetch.apply(this, arguments);
             };
         })();
+        // 初始化显示当前站点状态
+        testSiteAvailability(currentApiSource).then(updateSiteStatus);
     </script>
 </body>
 </html>
