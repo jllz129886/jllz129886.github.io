@@ -478,7 +478,7 @@
                         throw new Error('缺少搜索参数');
                     }
                     // 使用代理URL解决CORS问题
-                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                    const proxyUrl = 'https://proxy.mengze.vip/proxy/';
                     const apiUrl = customApi
                         ? `${customApi}/api.php/provide/vod/?ac=list&wd=${encodeURIComponent(searchQuery)}`
                         : `${API_SITES[source].api}/api.php/provide/vod/?ac=list&wd=${encodeURIComponent(searchQuery)}`;
@@ -508,7 +508,7 @@
                     }
 
                     // 使用代理URL解决CORS问题
-                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                    const proxyUrl = 'https://proxy.mengze.vip/proxy/';
                     const detailUrl = customApi
                         ? `${customApi}/index.php/vod/detail/id/${id}.html`
                         : `${API_SITES[source].detail}/index.php/vod/detail/id/${id}.html`;
