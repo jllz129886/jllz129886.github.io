@@ -31,29 +31,40 @@
 </head>
 <body class="page-bg text-white">
     <div class="container mx-auto px-4 py-8 flex flex-col h-screen">
-        <div class="flex-1 flex flex-col items-center justify-center">
-            <h1 class="text-5xl font-bold gradient-text mb-12">视频搜索</h1>
-            <div class="w-full max-w-2xl">
-                <div class="flex">
-                    <input type="text" id="searchInput" 
-                        class="w-full bg-[#111] border border-[#333] text-white px-6 py-4 rounded-l-lg focus:outline-none focus:border-white transition-colors" 
-                        placeholder="搜索你喜欢的视频...">
-                    <button onclick="search()" 
-                        class="px-8 py-4 bg-white text-black font-medium rounded-r-lg hover:bg-gray-200 transition-colors">
-                        搜索
-                    </button>
+        <div class="flex-1 flex flex-col">
+            <!-- 搜索区域 -->
+            <div id="searchArea" class="flex-1 flex flex-col items-center justify-center">
+                <h1 class="text-5xl font-bold gradient-text mb-12">视频搜索</h1>
+                <div class="w-full max-w-2xl">
+                    <div class="flex">
+                        <input type="text" id="searchInput" 
+                            class="w-full bg-[#111] border border-[#333] text-white px-6 py-4 rounded-l-lg focus:outline-none focus:border-white transition-colors" 
+                            placeholder="搜索你喜欢的视频...">
+                        <button onclick="search()" 
+                            class="px-8 py-4 bg-white text-black font-medium rounded-r-lg hover:bg-gray-200 transition-colors">
+                            搜索
+                        </button>
+                    </div>
                 </div>
+            </div>
+            
+            <!-- 搜索结果区域 -->
+            <div id="resultsArea" class="w-full hidden">
+                <div id="results" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
             </div>
         </div>
     </div>
 
-    <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center">
+    <!-- 详情模态框 -->
+    <div id="modal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center z-50">
         <div class="bg-[#111] p-8 rounded-lg w-11/12 max-w-4xl border border-[#333] max-h-[90vh] flex flex-col">
             <div class="flex justify-between items-center mb-6">
                 <h2 id="modalTitle" class="text-2xl font-bold gradient-text"></h2>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-white text-2xl">&times;</button>
             </div>
-            <div id="modalContent" class="overflow-auto flex-1 min-h-0"></div>
+            <div id="modalContent" class="overflow-auto flex-1 min-h-0">
+                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2"></div>
+            </div>
         </div>
     </div>
 
@@ -61,6 +72,9 @@
         const API_SOURCE = 'heimuer';
         const API_URL = 'https://json.heimuer.xyz';
         const PROXY_URL = 'https://proxy.mengze.vip/proxy/';
+
+        // 检测是否是反代访问
+        const isProxyRequest = window.location.href.includes('proxy.mengze.vip/proxy/');
 
         function showLoading() {
             document.body.style.cursor = 'wait';
@@ -74,20 +88,31 @@
             alert(message);
         }
 
+        // 构建API请求URL
+        function buildApiUrl(path, params = {}) {
+            const queryString = Object.entries(params)
+                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+                .join('&');
+            
+            const fullUrl = `${API_URL}${path}${queryString ? '?' + queryString : ''}`;
+            
+            return isProxyRequest 
+                ? fullUrl  // 反代访问直接使用原始URL
+                : `${PROXY_URL}${encodeURIComponent(fullUrl)}`; // 直接访问需要编码
+        }
+
         async function search() {
             showLoading();
             const query = document.getElementById('searchInput').value;
             if (!query) return showError('请输入搜索内容');
 
             try {
-                // 兼容直接访问和反代访问
-                const isProxyRequest = window.location.href.includes('proxy.mengze.vip/proxy/');
-                const apiPath = `/api.php/provide/vod/?ac=list&wd=${encodeURIComponent(query)}`;
-                const targetUrl = isProxyRequest 
-                    ? `${API_URL}${apiPath}`
-                    : `${PROXY_URL}${encodeURIComponent(API_URL + apiPath)}`;
+                const url = buildApiUrl('/api.php/provide/vod/', {
+                    ac: 'list',
+                    wd: query
+                });
 
-                const response = await fetch(targetUrl);
+                const response = await fetch(url);
                 const data = await response.json();
                 
                 if (!data.list || data.list.length === 0) {
@@ -103,33 +128,28 @@
         }
 
         function showResults(list) {
-            const modal = document.getElementById('modal');
-            const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
+            // 显示结果区域，调整搜索区域
+            document.getElementById('searchArea').classList.remove('flex-1');
+            document.getElementById('searchArea').classList.add('mb-8');
+            document.getElementById('resultsArea').classList.remove('hidden');
             
-            modalTitle.textContent = '搜索结果';
-            modalContent.innerHTML = list.map(item => `
-                <div class="card-hover bg-[#111] rounded-lg p-4 mb-4 cursor-pointer" 
+            // 使用原来的样式显示结果
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = list.map(item => `
+                <div class="card-hover bg-[#111] rounded-lg overflow-hidden cursor-pointer p-6 h-fit" 
                      onclick="showDetails('${item.vod_id}','${item.vod_name}')">
-                    <h3 class="text-xl font-semibold">${item.vod_name}</h3>
-                    <p class="text-gray-400 text-sm">${item.type_name} | ${item.vod_remarks}</p>
+                    <h3 class="text-xl font-semibold mb-3">${item.vod_name}</h3>
+                    <p class="text-gray-400 text-sm mb-2">${item.type_name}</p>
+                    <p class="text-gray-400 text-sm">${item.vod_remarks}</p>
                 </div>
             `).join('');
-            
-            modal.classList.remove('hidden');
         }
 
         async function showDetails(id, name) {
             showLoading();
             try {
-                // 兼容直接访问和反代访问
-                const isProxyRequest = window.location.href.includes('proxy.mengze.vip/proxy/');
-                const apiPath = `/index.php/vod/detail/id/${id}.html`;
-                const targetUrl = isProxyRequest 
-                    ? `${API_URL}${apiPath}`
-                    : `${PROXY_URL}${encodeURIComponent(API_URL + apiPath)}`;
-
-                const response = await fetch(targetUrl);
+                const url = buildApiUrl(`/index.php/vod/detail/id/${id}.html`);
+                const response = await fetch(url);
                 const html = await response.text();
                 
                 const matches = html.match(/\$https?:\/\/[^"'\s]+?\.m3u8/g) || [];
@@ -152,19 +172,15 @@
         function showEpisodes(name, episodes) {
             const modal = document.getElementById('modal');
             const modalTitle = document.getElementById('modalTitle');
-            const modalContent = document.getElementById('modalContent');
+            const modalContent = document.getElementById('modalContent').querySelector('div');
             
             modalTitle.textContent = name;
-            modalContent.innerHTML = `
-                <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                    ${episodes.map((url, index) => `
-                        <button onclick="playVideo('${encodeURIComponent(url)}','${name}', ${index + 1})" 
-                                class="px-4 py-2 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-white rounded-lg">
-                            第${index + 1}集
-                        </button>
-                    `).join('')}
-                </div>
-            `;
+            modalContent.innerHTML = episodes.map((url, index) => `
+                <button onclick="playVideo('${encodeURIComponent(url)}','${name}', ${index + 1})" 
+                        class="px-4 py-2 bg-[#222] hover:bg-[#333] border border-[#333] hover:border-white rounded-lg transition-colors text-center">
+                    第${index + 1}集
+                </button>
+            `).join('');
             
             modal.classList.remove('hidden');
         }
@@ -181,7 +197,7 @@
                         frameborder="0" 
                         allowfullscreen>
                     </iframe>
-                    <button onclick="showDetailsFromPlayback('${name}')" 
+                    <button onclick="showEpisodes('${name.replace(/'/g, "\\'")}')" 
                             class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg">
                         返回剧集列表
                     </button>
