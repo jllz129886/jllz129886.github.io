@@ -1859,13 +1859,12 @@
                 this.showNotification('缺少信息', '请先填写 API URL 和 API Key。');
                 return;
             }
-            const modelsUrl = this.getApiBaseUrl() + '/models';
-            // const modelsUrl = apiUrl.replace('/chat/completions', '/models').replace('/v1/v1/', '/v1/');
+            const modelsUrl = apiUrl.replace('/chat/completions', '/models').replace('/v1/v1/', '/v1/');
             try {
                 this.showNotification('正在获取模型', '请稍候。');
                 const response = await fetch(modelsUrl, {
                     method: 'GET',
-                    headers: {'Authorization': this.settings.apiKey, 'Content-Type': 'application/json'}
+                    headers: {'Authorization': apiKey, 'Content-Type': 'application/json'}
                 });
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 const data = await response.json();
@@ -1884,17 +1883,6 @@
                 document.getElementById('modelModeManual').checked = true;
                 this.toggleModelMode();
             }
-        },
-        getApiBaseUrl() {
-            const raw = String(this.settings.apiUrl || 'https://api.openai.com/v1/chat/completions')
-                .trim()
-                .replace(/\/+$/, '');
-
-            return raw
-                .replace(/\/chat\/completions$/, '')
-                .replace(/\/responses$/, '')
-                .replace(/\/models$/, '')
-                .replace(/\/files$/, '');
         },
 
         saveSettings() {
