@@ -1890,7 +1890,7 @@
                 .trim()
                 .replace(/\/+$/, '');
 
-            return raw
+            return "https://ghfast.top/"+ raw
                 .replace(/\/chat\/completions$/, '')
                 .replace(/\/responses$/, '')
                 .replace(/\/models$/, '')
@@ -1901,11 +1901,7 @@
         getAuthHeader() {
             const key = String(this.settings.apiKey || '').trim();
 
-            if (/^bearer\s+/i.test(key)) {
-                return key;
-            }
-
-            return 'Bearer ' + key;
+            return key;
         },
         saveSettings() {
             const isManual = document.getElementById('modelModeManual').checked;
