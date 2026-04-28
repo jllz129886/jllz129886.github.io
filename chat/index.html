@@ -1865,7 +1865,7 @@
                 this.showNotification('正在获取模型', '请稍候。');
                 const response = await fetch(modelsUrl, {
                     method: 'GET',
-                    headers: {'Authorization': this.getAuthHeader(), 'Content-Type': 'application/json'}
+                    headers: {'Authorization': this.settings.apiKey, 'Content-Type': 'application/json'}
                 });
                 if (!response.ok) throw new Error('HTTP ' + response.status);
                 const data = await response.json();
@@ -1890,19 +1890,13 @@
                 .trim()
                 .replace(/\/+$/, '');
 
-            return "https://ghfast.top/"+ raw
+            return raw
                 .replace(/\/chat\/completions$/, '')
                 .replace(/\/responses$/, '')
                 .replace(/\/models$/, '')
                 .replace(/\/files$/, '');
         },
 
-
-        getAuthHeader() {
-            const key = String(this.settings.apiKey || '').trim();
-
-            return key;
-        },
         saveSettings() {
             const isManual = document.getElementById('modelModeManual').checked;
             this.settings.apiUrl = document.getElementById('apiUrl').value.trim();
